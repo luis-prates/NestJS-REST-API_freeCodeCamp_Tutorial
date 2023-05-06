@@ -16,13 +16,17 @@ export class AuthService {
 	) {}
 	async signup(dto: AuthDto) {
 		//generate password
-		const hash = await argon.hash(dto.password);
+		const hash = await argon.hash(dto.name);
 
 		// save the new user in the db
 		try {
 			const user = await this.prisma.user.create({
 				data: {
+					name: dto.name,
 					email: dto.email,
+					id: dto.id,
+					nickname: dto.nickname,
+					image: dto.image,
 					hash,
 				},
 			})
@@ -30,7 +34,7 @@ export class AuthService {
 			delete user.hash;
 	
 			// return the saved user
-			return (this.signToken(user.id, user.email));
+			return (this.signToken(dto));
 		} catch (error) {
 			if (error instanceof PrismaClientKnownRequestError) {
 				if (error.code === 'P2002') {
@@ -55,18 +59,18 @@ export class AuthService {
 			throw new ForbiddenException('Credentials incorrect');
 
 		// compare password
-		const pwMatches = await argon.verify(user.hash,dto.password);
+		/*const pwMatches = await argon.verify(user.hash,dto.password);
 		// if password incorrect throw error
 		if (!pwMatches)
-			throw new ForbiddenException('Credentials incorrect');
+			throw new ForbiddenException('Credentials incorrect');*/
 
-		return (this.signToken(user.id, user.email));
+		return (this.signToken(dto));
 	}
 
-	async signToken(userId: number, email: string) : Promise<{ access_token: string }> {
+	async signToken(dto: AuthDto) : Promise<{dto: AuthDto, access_token: string }> {
 		const payload = {
-			sub: userId,
-			email
+			sub: dto.id,
+			email: dto.email
 		};
 		const secret = this.config.get('JWT_SECRET');
 		
@@ -78,6 +82,7 @@ export class AuthService {
 		);
 
 		return {
+			dto,
 			access_token: token
 		};
 

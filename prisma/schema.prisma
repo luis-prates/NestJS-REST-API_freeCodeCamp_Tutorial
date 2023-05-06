@@ -11,15 +11,17 @@ datasource db {
 }
 
 model User {
-	id Int @id @default(autoincrement())
+	id Int @id @unique
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
 
 	email String @unique
 	hash String
 
-	firstName String?
-	lastName String?
+	name String
+	nickname String @unique
+	image String?
+	//lastName String?
 
 	bookmarks Bookmark[]
 	

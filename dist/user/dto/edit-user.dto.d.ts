@@ -1,5 +1,6 @@
 export declare class EditUserDto {
     email?: string;
-    firstName?: string;
-    lastName?: string;
+    name?: string;
+    nickname?: string;
+    image?: string;
 }
