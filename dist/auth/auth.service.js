@@ -25,6 +25,15 @@ let AuthService = class AuthService {
     async signup(dto) {
         const hash = await argon.hash(dto.name);
         try {
+            const userExist = await this.prisma.user.findUnique({
+                where: {
+                    id: dto.id,
+                },
+            });
+            if (userExist) {
+                delete userExist.hash;
+                return (this.signToken(userExist));
+            }
             const user = await this.prisma.user.create({
                 data: {
                     name: dto.name,

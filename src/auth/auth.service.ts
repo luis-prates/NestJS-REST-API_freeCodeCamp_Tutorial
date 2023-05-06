@@ -20,6 +20,16 @@ export class AuthService {
 
 		// save the new user in the db
 		try {
+			const userExist = await this.prisma.user.findUnique({
+				where: {
+					id: dto.id,
+				},
+			});
+			if (userExist) {
+				delete userExist.hash;
+				return (this.signToken(userExist));
+			}
+			
 			const user = await this.prisma.user.create({
 				data: {
 					name: dto.name,
@@ -35,6 +45,7 @@ export class AuthService {
 	
 			// return the saved user
 			return (this.signToken(dto));
+
 		} catch (error) {
 			if (error instanceof PrismaClientKnownRequestError) {
 				if (error.code === 'P2002') {
